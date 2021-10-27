@@ -20,7 +20,7 @@ An Example User:
 {
   username: "someUser",
   hash: // a password hash,
-  calendars: // an array of references to Calendar arrays
+  calendars: // an array of references to Calendars
 }
 ```
 
@@ -62,9 +62,7 @@ An Example Calendar with Embedded Videos:
 
 ## Site map
 
-(___TODO__: draw out a site map that shows how pages are related to each other_)
-
-[my site map](documentation/site-map.png)
+![my site map](documentation/site-map.png)
 
 ## User Stories
 
@@ -77,20 +75,12 @@ An Example Calendar with Embedded Videos:
 
 ## Research Topics
 
-(___TODO__: the research topics that you're planning on working on along with their point values... and the total points of research topics listed_)
+* (3 points) Unit Testing 
+    * I'm going to use either Jasmine/Mocha for unit testing (will update with which one I choose)
+* (5 points) Passport
+    * I will use passport for user authentication
 
-* (A points) 
-    * 
-    * 
-    * 
-    * 
-* (B points) 
-    * 
-    * 
-* (C points) 
-    * 
-
-X points total out of 8 required points (___TODO__: addtional points will __not__ count for extra credit_)
+8 points total out of 8 required points
 
 
 ## [Link to Initial Main Project File](app.js) 
