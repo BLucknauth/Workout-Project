@@ -1,0 +1,16 @@
+<div id="calendar">
+    <h2> {{calendarName}} </h2>
+    <table>
+        {{#displayDays days}}
+            {{{this}}}
+        {{/displayDays}}
+    </table>
+</div>
+
+<form>
+    Add Video:
+    <input type="text" id="video_name" onfocus="this.value=''" onfocusout="this.value='Video Name'" value="Video Name">
+    <input type="text" id="video_link" onfocus="this.value=''" onfocusout="this.value='Link'" value="Link">
+    <input type="submit" id="add_video" value="Add Video">
+    <br>
+</form>

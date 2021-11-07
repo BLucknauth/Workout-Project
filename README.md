@@ -2,7 +2,7 @@
 
 ## Overview
 
-Over the pandemic, many found themselves turning to at-home workouts via Youtube for a safe alternative to the gym, but it can be difficult to keep track of which videos you've done/ you plan on doing. 
+Over the pandemic, many found themselves turning to at-home workouts via Youtube for a safe alternative to the gym, but it can be difficult to keep track of which videos you've done/you plan on doing when creating a routine. 
 
 Workout is a web app that will allow users to either follow pre-existing workout calendars from fitness Youtubers. Users will be able to check off the days/workouts they've done to keep track of their progress & create their own workout calendars. They will even be able to share said calendars with other users so multiple users may follow a calendar at once and see each other's progress. 
 
