@@ -8,7 +8,11 @@
 </head>
 <body>
     <div id="header">
-        <a href= "/login"> Log in</a> | <a href= "/register"> Create Account </a>
+        {{#if user}}
+            <a href= "/calendars"> {{user.username}} </a> 
+        {{else}}
+            <a href= "/login"> Log in</a> | <a href= "/register"> Create Account </a>
+        {{/if}}
     </div>
     <div id="title"> 
         Workout
