@@ -9,7 +9,7 @@
 <body>
     <div id="header">
         {{#if user}}
-            <a href= "/calendars"> {{user.username}} </a> 
+            <a href= "/calendars"> {{user.username}} </a> | <a href= "/logout"> Log out </a>
         {{else}}
             <a href= "/login"> Log in</a> | <a href= "/register"> Create Account </a>
         {{/if}}
