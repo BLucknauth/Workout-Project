@@ -109,21 +109,21 @@ app.get('/calendars/add/video', (req, res) => {
 
 });
 
-app.get('/login', (req, res) => {
-    res.render('login');
-});
-
-app.post('/login', passport.authenticate('local', {failureRedirect: '/login'}), function (req, res) {
-    req.session.regenerate((err) => {
-        if (err) {
-            console.log(err);
-            res.render('register', {message: 'An error occurred, please try again'});
-        } else {
-            req.session.user = req.user;
-            res.redirect('/home');
-        }
+app.route('/login')
+    .get((req, res) => {
+        res.render('login');
+    })
+    .post(passport.authenticate('local', {failureRedirect: '/login'}), function (req, res) {
+        req.session.regenerate((err) => {
+            if (err) {
+                console.log(err);
+                res.render('register', {message: 'An error occurred, please try again'});
+            } else {
+                req.session.user = req.user;
+                res.redirect('/home');
+            }
+        });
     });
-});
 
 app.get('/register', (req, res) => {
     res.render('register');
