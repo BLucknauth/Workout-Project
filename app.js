@@ -40,6 +40,21 @@ Handlebars.registerHelper('displayDays', function(n) {
     return accum;
 });
 
+Handlebars.registerHelper('displayVideos', function(arr) {
+    // creates table row of videos
+    let accum = '<tr>';
+    for(let i = 0; i < arr.length; i++) {
+        if (arr[i]) {
+            accum += `<td> <a href="${arr[i].link}">${arr[i].name}</a> </td>`;
+        } else {
+            accum += '<td> </td>';
+        }
+       
+    }
+    accum +='</tr>';
+    return accum;
+});
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -90,7 +105,10 @@ app.get('/home', (req, res) => {
 app.get('/calendars', (req, res) => {
     // TODO: Make this render calendar!! 
     // TODO: This should also authenticate + not show calendars if not logged in
-    res.render('calendars', {user: req.session.user || null, calendar: req.session.user.calendars || null});
+    let obj = {}; 
+    obj.user = req.session.user ? req.session.user : null;
+    obj.calendar = req.session.user.calendars ? req.session.user.calendars : null; 
+    res.render('calendars', obj);
 });
 
 app.get('/calendars/add', (req, res) => {
@@ -109,23 +127,54 @@ app.post('/calendars/add', (req, res) => {
         creator: req.session.user,
         users: [],
         days: req.body.days,
-        videos: []
+        videos: Array(req.body.days)
     }).save(function(err, cal) {
         if (err) {
             console.log(err);
             res.render('add-calendars', {message: 'An error occurred saving calendar, please try again'})
         } else {
             // TODO: need to pass user to template in addition to calendar
-            console.log('User is : ' + req.session.user);
             req.session.user.calendars.push(cal);
-            console.log('User after adding:' + req.session.user.calendars);
-            res.render('add-videos', cal);
+            res.redirect('/calendars/add/video/?id=' + cal._id)
+            //res.render('add-videos', cal);
         }
     })
 });
 
 app.get('/calendars/add/video', (req, res) => {
+    console.log('query is: ' + req.query.id);
+    Calendar.findOne({_id: req.query.id}, (err, cal) => {
+        if (err) {
+            console.log(err);
+            res.send('An error occured, check the server output');
+        } else {
+            res.render('add-videos', cal);
+        }
+    });
+});
 
+app.post('/calendars/add/video', (req, res) => {
+    const newVideo = {
+        name: req.body.name,
+        link: req.body.link
+    };
+    Calendar.findOne({_id: req.query.id}, (err, foundCal) => {
+        if (err) {
+            console.log(err);
+            res.send('An error occured, check the server output');
+        } else {
+            const videoArr = foundCal.videos;
+            videoArr[req.body.day] = newVideo;
+            Calendar.findOneAndUpdate({_id: req.query.id}, {videos: videoArr}, (err, cal) => {
+                if(err) {
+                    console.log(err);
+                    res.send('An error occured, check the server output');
+                } else {
+                    res.redirect('/calendars/add/video/?id=' + cal._id)
+                }
+            });
+        }
+    });
 });
 
 app.route('/login')
