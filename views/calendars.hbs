@@ -1,0 +1,10 @@
+{{#each calendar}}
+    <div id="calendar">
+        <h2> {{calendar.calendarName}} </h2>
+        <table>
+            {{#displayDays calendar.days}}
+                {{{this}}}
+            {{/displayDays}}
+        </table>
+    </div>
+{{/each}}

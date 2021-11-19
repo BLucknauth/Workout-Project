@@ -6,7 +6,7 @@ const passportLocalMongoose = require('passport-local-mongoose');
 // after searching around -- most likely using Bcrypt for hashing pw + passport for authentication
 const User = new mongoose.Schema({
     username: {type: String, unique: true}, //TODO: do type checking on input as well, shouldn't be case sensitive 
-    password: String,
+    password: String, // hashed pw
     calendars: Array //array of calendars the user is currently using
 });
 User.plugin(passportLocalMongoose);

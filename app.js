@@ -42,6 +42,17 @@ Handlebars.registerHelper('displayDays', function(n) {
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+passport.serializeUser(function(user, done) {
+	done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+	User.findById(id, function(err, user) {
+		done(err, user);
+	});
+});
+
 passport.use(new LocalStrategy(
   function(username, password, done) {
     User.findOne({ username: username }, function(err, user) {
@@ -52,7 +63,6 @@ passport.use(new LocalStrategy(
         bcrypt.compare(password, user.password, (err, passwordMatch) => {
             if (err) {
                 console.log(err);
-                res.send('An error occured, please check the server output'); 
                 return;
             } else if (!passwordMatch) {
                 return done(null, false, {message:'Incorrect password.'});
@@ -66,7 +76,7 @@ passport.use(new LocalStrategy(
 ));
 
 const User = mongoose.model('User');
-// const Calendar = mongoose.model('Calendar');
+const Calendar = mongoose.model('Calendar');
 
 app.get('/', (req, res) => {
     res.redirect('home');
@@ -80,7 +90,7 @@ app.get('/home', (req, res) => {
 app.get('/calendars', (req, res) => {
     // TODO: Make this render calendar!! 
     // TODO: This should also authenticate + not show calendars if not logged in
-    res.render('calendars', {user: req.session.user || null});
+    res.render('calendars', {user: req.session.user || null, calendar: req.session.user.calendars || null});
 });
 
 app.get('/calendars/add', (req, res) => {
@@ -88,21 +98,30 @@ app.get('/calendars/add', (req, res) => {
     if (req.session.user) {
         res.render('add-calendars', {user: req.session.user});
     } else {
-        res.render('add-calendars', {message: 'Must be logged in to add calendar.'})
+        res.render('add-calendars', {message: 'Must be logged in to add calendar.'});
     }
 });
 
 app.post('/calendars/add', (req, res) => {
     // TODO: Need to make it work with authentication
-    const calendarObj = {
-        calendarName: req.body.calendarName,
+    new Calendar({
+        name: req.body.calendarName,
+        creator: req.session.user,
+        users: [],
         days: req.body.days,
-        videos: [],
-    }
-
-    // TODO: need to pass user to template in addition to calendar
-    req.session.user.calendars.push(calendarObj);
-    res.render('add-videos', calendarObj);
+        videos: []
+    }).save(function(err, cal) {
+        if (err) {
+            console.log(err);
+            res.render('add-calendars', {message: 'An error occurred saving calendar, please try again'})
+        } else {
+            // TODO: need to pass user to template in addition to calendar
+            console.log('User is : ' + req.session.user);
+            req.session.user.calendars.push(cal);
+            console.log('User after adding:' + req.session.user.calendars);
+            res.render('add-videos', cal);
+        }
+    })
 });
 
 app.get('/calendars/add/video', (req, res) => {
@@ -117,7 +136,7 @@ app.route('/login')
         req.session.regenerate((err) => {
             if (err) {
                 console.log(err);
-                res.render('register', {message: 'An error occurred, please try again'});
+                res.render('login', {message: 'An error occurred, please try again'});
             } else {
                 req.session.user = req.user;
                 res.redirect('/home');
@@ -189,15 +208,4 @@ function hashPassword(password) {
         });
     });
 }
-
-passport.serializeUser(function(user, done) {
-	done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-	User.findById(id, function(err, user) {
-		done(err, user);
-	});
-});
-
 app.listen(process.env.PORT || 3000);
