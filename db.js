@@ -20,7 +20,7 @@ User.methods.validPassword = function (enteredPassword) {
             return passwordMatch;
         }
     });
-}
+};
 
 const Calendar = new mongoose.Schema({ 
     name: String, // name of calendar

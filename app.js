@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
 
-// TODO: Make videos added update the calendar under users!
+// TO DO: still need to update your calendars page once videos are added
 
 const sessionOptions = {
     secret: process.env.SECRET,
@@ -141,7 +141,7 @@ app.post('/calendars/add', (req, res) => {
     User.findOne({_id: req.session.user}, (err, user) => {
         if (err) {
             console.log(err);
-            res.send('Error occured, try again.')
+            res.send('Error occured, try again.');
         } else if (user) {
             new Calendar({
                 name: req.body.calendarName,
@@ -152,20 +152,20 @@ app.post('/calendars/add', (req, res) => {
             }).save(function(err, cal) {
                 if (err) {
                     console.log(err);
-                    res.render('add-calendars', {message: 'An error occurred saving calendar, please try again'})
+                    res.render('add-calendars', {message: 'An error occurred saving calendar, please try again'});
                 } else {
                     const calendarArr = user.calendars;
-                    calendarArr.push(cal)
+                    calendarArr.push(cal);
                     User.findOneAndUpdate({_id: req.session.user}, {calendars: calendarArr}, (err, result) => {
                         if (err) {
                             console.log(err);
                             res.send('An error occured, check server output.');
                         } else {
-                            res.redirect('/calendars/add/video/?id=' + cal._id)
+                            res.redirect('/calendars/add/video/?id=' + cal._id);
                         }
                     });
                 }
-            })
+            });
         } else {
             res.redirect('/calendars/add');
         }
@@ -185,6 +185,7 @@ app.get('/calendars/add/video', (req, res) => {
 });
 
 app.post('/calendars/add/video', (req, res) => {
+
     const newVideo = {
         name: req.body.name,
         link: req.body.link
@@ -194,16 +195,20 @@ app.post('/calendars/add/video', (req, res) => {
             console.log(err);
             res.send('An error occured, check the server output');
         } else {
-            const videoArr = foundCal.videos;
-            videoArr[parseInt(req.body.day)-1] = newVideo; // TODO LATER: make it so multiple videos can be under one day
-            Calendar.findOneAndUpdate({_id: req.query.id}, {videos: videoArr}, (err, cal) => {
-                if(err) {
-                    console.log(err);
-                    res.send('An error occured, check the server output');
-                } else {
-                    res.redirect('/calendars/add/video/?id=' + cal._id)
-                }
-            });
+            if (req.body.day > foundCal.days || isNaN(req.body.day) || req.body.name.includes('<')) {
+                res.redirect('/calendars/add/video/?id=' + foundCal._id);
+            } else {
+                const videoArr = foundCal.videos;
+                videoArr[parseInt(req.body.day)-1] = newVideo; // TODO LATER: make it so multiple videos can be under one day
+                Calendar.findOneAndUpdate({_id: req.query.id}, {videos: videoArr}, (err, cal) => {
+                    if(err) {
+                        console.log(err);
+                        res.send('An error occured, check the server output');
+                    } else {
+                        res.redirect('/calendars/add/video/?id=' + cal._id);
+                    }
+                });
+            }
         }
     });
 });
@@ -213,7 +218,7 @@ app.route('/login')
         if (!req.session.user) {
             res.render('login');
         } else {
-            res.render('login', {message: 'Already logged in.'})
+            res.render('login', {message: 'Already logged in.'});
         }
     })
     .post(passport.authenticate('local', {failureRedirect: '/login'}), function (req, res) {
@@ -274,8 +279,8 @@ app.post('/register', (req, res) => {
                                 }
                             });
                         }
-                    })
-                })
+                    });
+                });
             }
         });
     }

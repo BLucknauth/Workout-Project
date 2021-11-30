@@ -75,8 +75,8 @@ An Example Calendar with Embedded Videos:
 
 ## Research Topics
 
-* (3 points) Unit Testing 
-    * I'm going to use either Jasmine/Mocha for unit testing (will update with which one I choose)
+* (5 points) Use Grunt to integrate JSHint
+    * I'm going to use Grunt + JSHint to run automatically on file change
 * (5 points) Passport
     * I will use passport for user authentication
 
@@ -89,5 +89,6 @@ An Example Calendar with Embedded Videos:
 
 (___TODO__: list any tutorials/references/etc. that you've based your code off of_)
 
-1. No references used yet, will update as I create the app
+1. [Grunt setup with JSHint](https://www.codereadability.com/jshint-with-grunt/)
+2. [Passport setup](http://www.passportjs.org/docs/)
 

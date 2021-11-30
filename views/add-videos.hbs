@@ -1,11 +1,11 @@
 <div id="calendar">
-    <h2> {{calendarName}} </h2>
+    <h2> {{name}} </h2>
     <table>
         {{#displayDays days}}
-            {{{this}}}
+            {{this}}
         {{/displayDays}}
         {{#displayVideos videos}}
-            {{{this}}}
+            {{this}}
         {{/displayVideos}}
     </table>
 </div>
