@@ -81,7 +81,7 @@ An Example Calendar with Embedded Videos:
 * (5 points) Passport
     * I will use passport for user authentication
 
-8 points total out of 8 required points
+10 points total out of 8 required points
 
 
 ## [Link to Initial Main Project File](app.js) 
