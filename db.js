@@ -17,7 +17,6 @@ User.methods.validPassword = function (enteredPassword) {
             res.send('An error occured, please check the server output'); 
             return;
         } else {
-            console.log('password match? ' + passwordMatch);
             return passwordMatch;
         }
     });

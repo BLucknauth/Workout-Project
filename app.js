@@ -9,8 +9,7 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
 
-// TODO: Create logout page
-// TODO: Error handling for inputs
+// TODO: Make videos added update the calendar under users!
 
 const sessionOptions = {
     secret: process.env.SECRET,
@@ -33,9 +32,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 Handlebars.registerHelper('displayDays', function(n) {
     // creates header row of days
     let accum = '<tr>';
-    for(let i = 0; i < n; i++) {
+    // make + fill arr
+    // doesn't really matter what we fill it with, just doing this so we can use map
+    const tempArr = new Array(n).fill(0);
+    tempArr.map((ele, i) => {
         accum += `<th> Day ${i+1} </th>`;
-    }
+    });
     accum +='</tr>';
     return accum;
 });
@@ -43,14 +45,13 @@ Handlebars.registerHelper('displayDays', function(n) {
 Handlebars.registerHelper('displayVideos', function(arr) {
     // creates table row of videos
     let accum = '<tr>';
-    for(let i = 0; i < arr.length; i++) {
-        if (arr[i]) {
-            accum += `<td> <a href="${arr[i].link}">${arr[i].name}</a> </td>`;
+    arr.map(ele => {
+        if (ele) {
+            accum += `<td> <a href="${ele.link}">${ele.name}</a> </td>`;
         } else {
             accum += '<td> </td>';
         }
-       
-    }
+    });
     accum +='</tr>';
     return accum;
 });
@@ -98,57 +99,87 @@ app.get('/', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-    // TODO: Have some pre-loaded calendars here
-    res.render('index', {user: req.session.user || null});
+    const defaultCalendars =  [ 
+        {name: "Sample Calendar 1",
+        days: 7,
+        videos: [{name: "Full Body workout", link: 'https://youtu.be/abP8Qlee7lg'}, 
+                {name: 'Ab workout', link: 'https://youtu.be/xUkMec47Wqw'}, 
+                {name: 'Ab & Arm workout', link: 'https://youtu.be/P3HKHN2M72M'},
+                {name: 'Lower Body workout', link: 'https://youtu.be/WSqYBU_6agQ'},
+                {name: 'Arms & Upper Body workout', link: 'https://youtu.be/iN-AEOs9rzc'},
+                {name: '25 min Full Body workout', link: 'https://youtu.be/szRPTqEiIWE'},
+                {name: 'HIIT workout', link: 'https://youtu.be/9rQ5wxssQss'}]
+        }
+    ];
+    res.render('home', {
+        user: req.session.user || null,
+        calendar: defaultCalendars
+    });
 });
 
 app.get('/calendars', (req, res) => {
-    // TODO: Make this render calendar!! 
-    // TODO: This should also authenticate + not show calendars if not logged in
-    let obj = {}; 
-    obj.user = req.session.user ? req.session.user : null;
-    obj.calendar = req.session.user.calendars ? req.session.user.calendars : null; 
-    res.render('calendars', obj);
+    if (!req.session.user) {
+        res.render('calendars', {message: 'not logged in'});
+    } else {
+        let obj = {
+            user: req.session.user,
+            calendar: req.session.user.calendars
+        }; 
+        res.render('calendars', obj);
+    }
 });
 
 app.get('/calendars/add', (req, res) => {
-    // TODO: Need to make it work with authentication
     if (req.session.user) {
         res.render('add-calendars', {user: req.session.user});
     } else {
-        res.render('add-calendars', {message: 'Must be logged in to add calendar.'});
+        res.render('add-calendars');
     }
 });
 
 app.post('/calendars/add', (req, res) => {
-    // TODO: Need to make it work with authentication
-    new Calendar({
-        name: req.body.calendarName,
-        creator: req.session.user,
-        users: [],
-        days: req.body.days,
-        videos: Array(req.body.days)
-    }).save(function(err, cal) {
+    User.findOne({_id: req.session.user}, (err, user) => {
         if (err) {
             console.log(err);
-            res.render('add-calendars', {message: 'An error occurred saving calendar, please try again'})
+            res.send('Error occured, try again.')
+        } else if (user) {
+            new Calendar({
+                name: req.body.calendarName,
+                creator: req.session.user,
+                users: [],
+                days: req.body.days,
+                videos: new Array(parseInt(req.body.days))
+            }).save(function(err, cal) {
+                if (err) {
+                    console.log(err);
+                    res.render('add-calendars', {message: 'An error occurred saving calendar, please try again'})
+                } else {
+                    const calendarArr = user.calendars;
+                    calendarArr.push(cal)
+                    User.findOneAndUpdate({_id: req.session.user}, {calendars: calendarArr}, (err, result) => {
+                        if (err) {
+                            console.log(err);
+                            res.send('An error occured, check server output.');
+                        } else {
+                            res.redirect('/calendars/add/video/?id=' + cal._id)
+                        }
+                    });
+                }
+            })
         } else {
-            // TODO: need to pass user to template in addition to calendar
-            req.session.user.calendars.push(cal);
-            res.redirect('/calendars/add/video/?id=' + cal._id)
-            //res.render('add-videos', cal);
+            res.redirect('/calendars/add');
         }
-    })
+    });
 });
 
 app.get('/calendars/add/video', (req, res) => {
-    console.log('query is: ' + req.query.id);
     Calendar.findOne({_id: req.query.id}, (err, cal) => {
         if (err) {
             console.log(err);
             res.send('An error occured, check the server output');
         } else {
-            res.render('add-videos', cal);
+            const newObj = Object.assign(cal, req.session.user);
+            res.render('add-videos', newObj);
         }
     });
 });
@@ -164,7 +195,7 @@ app.post('/calendars/add/video', (req, res) => {
             res.send('An error occured, check the server output');
         } else {
             const videoArr = foundCal.videos;
-            videoArr[req.body.day] = newVideo;
+            videoArr[parseInt(req.body.day)-1] = newVideo; // TODO LATER: make it so multiple videos can be under one day
             Calendar.findOneAndUpdate({_id: req.query.id}, {videos: videoArr}, (err, cal) => {
                 if(err) {
                     console.log(err);
@@ -179,7 +210,11 @@ app.post('/calendars/add/video', (req, res) => {
 
 app.route('/login')
     .get((req, res) => {
-        res.render('login');
+        if (!req.session.user) {
+            res.render('login');
+        } else {
+            res.render('login', {message: 'Already logged in.'})
+        }
     })
     .post(passport.authenticate('local', {failureRedirect: '/login'}), function (req, res) {
         req.session.regenerate((err) => {
@@ -215,7 +250,7 @@ app.post('/register', (req, res) => {
         User.findOne({username: req.body.username}, (err, result) => {
             if (err) {
                 console.log(err);
-                res.render('register', {message: '1. An error occurred, please try again'});
+                res.render('register', {message: 'An error occurred, please try again'});
             } else if (result){
                 res.render('register', {message: "Username taken, please try again."});
             } else {
@@ -227,12 +262,12 @@ app.post('/register', (req, res) => {
                     }).save(function(err, user) {
                         if (err) {
                             console.log(err);
-                            res.render('register', {message: '2. An error occurred, please try again'});
+                            res.render('register', {message: 'An error occurred, please try again'});
                         } else {
                             req.session.regenerate((err) => {
                                 if (err) {
                                     console.log(err);
-                                    res.render('register', {message: '3. An error occurred, please try again'});
+                                    res.render('register', {message: 'An error occurred, please try again'});
                                 } else {
                                     req.session.user = user;
                                     res.redirect('/home');

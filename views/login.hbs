@@ -2,10 +2,10 @@
 
 {{#if message}}
     <h3 id="error">{{message}}</h3> 
+{{else}}
+	<form method="POST" action="login">
+		<div>Username: <input type="text" name="username" value=""></div>
+		<div>Password: <input type="password" name="password" value=""></div>
+		<div><input type="submit" value="login"></div>
+	</form>
 {{/if}}
-
-<form method="POST" action="login">
-	<div>Username: <input type="text" name="username" value=""></div>
-	<div>Password: <input type="password" name="password" value=""></div>
-	<div><input type="submit" value="login"></div>
-</form>
