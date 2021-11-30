@@ -77,6 +77,7 @@ An Example Calendar with Embedded Videos:
 
 * (5 points) Use Grunt to integrate JSHint
     * I'm going to use Grunt + JSHint to run automatically on file change
+![Grunt gif](documentation/grunt-jshint.gif)
 * (5 points) Passport
     * I will use passport for user authentication
 
